@@ -1,0 +1,11 @@
+One Day Planner:
+Description:
+A wise person said: “It is really important to plan your everyday if you want success in your life”. An easy to use application providing you the feature how to schedule the list of things to do for your single day and prioritize them according to their importance. When have done anything you can dismiss that item with just single click on DONE. Really an easy application for you to plan your day.
+	
+Features:
+•	An easy to use application for you to plan your day. 
+•	Prioritize the day’s to-dos according to their importance.
+•	When have done anything you can dismiss that itesm with just single click on DONE.
+•	Fully Different User Interface Designed keeping in focus point of view of Niche (Target) Market.
+•	Fully Unique Branding (Unique Logo Designing & Graphics Designing)
+

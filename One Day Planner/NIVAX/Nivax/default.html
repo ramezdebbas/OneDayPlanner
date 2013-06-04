@@ -1,0 +1,238 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Nivax</title>
+
+    <!-- WinJS references -->
+    <link href="//Microsoft.WinJS.1.0/css/ui-dark.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
+
+    <!-- App4 references -->
+    <link href="/css/default.css" rel="stylesheet" />
+    <script src="/js/default.js"></script>
+    <style type='text/css'>
+        input.moveButton {
+            padding: 2px 1px 1px 1px;
+            border: solid white thin;
+            background-color: coral;
+            float: right;
+            
+            
+        }
+
+        input.actionButton {
+            padding: 2px 10px 1px 10px;
+            border: solid white thin;
+            background-color: lightskyblue;
+        }
+
+            input.actionButton:hover {
+                border: solid white thin;
+                background-color: rgba(62, 230, 96, 1);
+                padding: 2px 10px 1px 10px;
+            }
+
+        td.taskcell {
+            column-width: 575px;
+            -ms-word-wrap: break-word;
+        }
+    </style>
+    <script language="javascript">
+        function setCharAt(str, index, ch) {
+            if (index > str.length - 1)
+                return str;
+            return str = str.substr(0, index) + ch + str.substr(index + 1);
+        }
+
+        function trimX(str) {
+            var j = 0;
+            var chardet = 0;
+            for (var i = 0; i < str.length; i++) {
+                if (str.charAt(i) == ' ') {
+                    if (chardet) {
+                        str = setCharAt(str, j, ' ');
+                        j++;
+                    }
+                    while (i < str.length && str.charAt(i) == ' ') i++;
+                    i--;
+                }
+                else {
+                    chardet = 1;
+                    str = setCharAt(str, j, str.charAt(i));
+                    j++;
+                }
+            }
+            if (j > 0 && str.charAt(j - 1) == ' ')
+                j = j - 1;
+            str = str.substr(0, j);
+            return str;
+        }
+
+        function moveUp(butid) {
+            var taskid = parseInt(butid.substring(5));
+            var upid = taskid - 1;
+            if (localStorage[taskid + ".task"] != null && localStorage[upid + ".task"] != null) {
+                var tempTask = localStorage[taskid + ".task"];
+                localStorage[taskid + ".task"] = localStorage[upid + ".task"];
+                localStorage[upid + ".task"] = tempTask;
+
+            }
+
+            showtasks();
+        }
+        function moveDown(butid) {
+            var taskid = parseInt(butid.substring(7));
+            var downid = taskid + 1;
+
+            if (localStorage[taskid + ".task"] != null && localStorage[downid + ".task"] != null) {
+                var tempTask = localStorage[taskid + ".task"];
+                localStorage[taskid + ".task"] = localStorage[downid + ".task"];
+                localStorage[downid + ".task"] = tempTask;
+
+            }
+
+            showtasks();
+        }
+        function deleteTask(butid) {
+            var taskid = parseInt(butid.substring(7));
+            if (localStorage[taskid + ".task"] != null) {
+                var curtask = taskid;
+                var n = localStorage.lastItemNo - 1;
+                var i = 0;
+                for (i = curtask + 1; i <= n; i++) {
+                    var j = i - 1;
+                    localStorage[j + ".task"] = localStorage[i + ".task"];
+
+                }
+                localStorage.lastItemNo = n;
+                localStorage.removeItem(n + ".task");
+            }
+            showtasks();
+        }
+        function isunique(givenTask) {
+
+
+            if (localStorage.lastItemNo != null && localStorage.lastItemNo != 0) {
+                var n = localStorage.lastItemNo;
+                var i = 0;
+                for (i = 0; i < n; i++) {
+
+                    var temp = localStorage[i + ".task"];
+
+
+                    if (trimX(temp) == trimX(givenTask))
+                        return 0;
+                }
+                return 1;
+            }
+
+            return 1;
+
+        }
+        function addtask() {
+            var txttask = document.getElementById("txtTodo");
+
+            if (txttask.value.trim() != "" && isunique(txttask.value)) {
+                var taskid = 0;
+
+                if (localStorage.lastItemNo != null)
+                    taskid = parseInt(localStorage.lastItemNo);
+                localStorage.lastItemNo = taskid + 1;
+                localStorage[taskid + ".task"] = txttask.value;
+                showtasks();
+                txttask.value = "";
+            }
+        }
+        function showtasks() {
+            var outtext = "<p>No tasks to do</p>";
+
+            if (localStorage.lastItemNo != null && localStorage.lastItemNo != 0) {
+                var n = localStorage.lastItemNo;
+                var i = 0;
+                outtext = "<table cellpadding=5 style='width:100%;'>";
+                var donebuttons = new Array(n);
+                var upbuttons = new Array(n);
+                var downbuttons = new Array(n);
+
+                for (i = 0; i < n; i++) {
+                    var myrow =
+                     outtext = outtext + "<tr>";
+                    outtext = outtext + "<td  style='width:100px' id='td.donebut." + i + "'>&nbsp";
+                    donebuttons[i] = document.createElement("input");
+                    donebuttons[i].type = "button";
+                    donebuttons[i].className = "actionButton";
+                    donebuttons[i].id = "butDone" + i;
+                    donebuttons[i].addEventListener("click", function () { deleteTask(this.id) });
+                    donebuttons[i].value = "Done";
+                    outtext = outtext + "</td>"
+                    outtext = outtext + "<td class='taskcell'>";
+                    outtext = outtext + localStorage[i + ".task"];
+                    outtext = outtext + "</td>";
+                    outtext = outtext + "<td id='td.upbut." + i + "'>&nbsp";
+                    upbuttons[i] = document.createElement("input");
+                    upbuttons[i].type = "button";
+                    upbuttons[i].alt = "Move Up";
+                    upbuttons[i].className = "moveButton";
+                    upbuttons[i].addEventListener("click", function () { moveUp(this.id) });
+                    upbuttons[i].id = "butup" + i;
+                    upbuttons[i].value = "\u25B2";
+                    downbuttons[i] = document.createElement("input");
+                    downbuttons[i].type = "button";
+                    upbuttons[i].alt = "Move Down";
+                    downbuttons[i].className = "moveButton";
+                    downbuttons[i].addEventListener("click", function () { moveDown(this.id) });
+                    downbuttons[i].id = "butDown" + i;
+                    downbuttons[i].value = "\u25BC";
+                    outtext = outtext + "</td>"
+                    outtext = outtext + "</tr>";
+                }
+                outtext = outtext + "</table>";
+            }
+            document.getElementById("displayarea").innerHTML = outtext;
+            for (i = 0; i < n; i++) {
+                document.getElementById("td.donebut." + i).appendChild(donebuttons[i]);
+                document.getElementById("td.upbut." + i).appendChild(upbuttons[i]);
+                document.getElementById("td.upbut." + i).appendChild(downbuttons[i]);
+
+            }
+
+        }
+
+    </script>
+</head>
+<body onload="showtasks()" style="background-color: rgb(106, 120, 228);">
+
+    <div style="margin: 0px 0px 20px 0px; height: 100px; text-weight: 5px">
+      <!--  <h1 style="text-align: center">One Day Planner</h1> -->
+    </div>
+    <div style="background-color: lightgray; margin: 20px 20px 20px 20px; padding: 10px 10px 5px 10px;border-radius:10px;">
+        <u>
+            <h3 style="text-align: center; color: black; font-size: 18px;">Today's Tasks..</h3>
+        </u>
+        <div style="margin-top: 20px; margin-left: 50px">
+
+            <form name="addtodoform">
+                <input id="txtTodo" neme="txtTodo" type="text" placeholder="Enter a Task" style="background-color: white" />
+                <input type="submit" onclick="addtask()" value="Add Task" style="color: white; background-color: violet;" />
+
+            </form>
+        </div>
+        <div>
+
+
+            <div class="ms-scrollview" id="displayarea" style="border-radius:5px;overflow-x: hidden; overflow-y: scroll; background-image:-ms-linear-gradient(left bottom, red 30%, orange 65%);  color: white; margin: 20px 50px 30px 50px; padding: 20px 20px 20px 20px; background-color: rgba(89, 157, 215, 0.78); height: 350px">
+            </div>
+
+        </div>
+    </div>
+    <div id="disclaimer" style="padding: 10px 20px 10px 20px; color: white; text-align: right; font-style: italic; font-size: 20px; height: 100%">
+        Developed By Zoomerz
+        
+    </div>
+    <img alt="logo" src="/images/logo.png">
+    <img alt="storelogo" src="/images/storelogo.png">
+    <img alt="splashscreen" src="/images/splashscreen.png">
+</body>
+</html>
